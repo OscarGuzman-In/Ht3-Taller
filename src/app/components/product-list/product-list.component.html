@@ -1,0 +1,49 @@
+<section class="product-list" *ngIf="reserved$ | async as reserved">
+  <div class="product-grid">
+    <article
+      class="product-card"
+      *ngFor="let product of products"
+      [class.out-of-stock]="availableStock(product, reserved) === 0"
+    >
+      <div class="product-image">
+        <img [src]="product.image" [alt]="product.name" />
+
+        <span *ngIf="availableStock(product, reserved) === 0" class="stock-badge">
+          AGOTADO
+        </span>
+      </div>
+
+      <div class="product-info">
+        <span class="product-category">
+          {{ product.category }}
+        </span>
+
+        <h3>{{ product.name }}</h3>
+
+        <p class="product-price">
+          {{ product.price | currency:'GTQ':'symbol':'1.2-2' }}
+        </p>
+
+        <p class="product-stock" *ngIf="availableStock(product, reserved) > 0">
+          Quedan {{ availableStock(product, reserved) }}
+          <span class="in-cart" *ngIf="quantityInCart(product.id, reserved) > 0">
+            · {{ quantityInCart(product.id, reserved) }} en carrito
+          </span>
+        </p>
+
+        <button
+          type="button"
+          [disabled]="availableStock(product, reserved) === 0"
+          (click)="addToCart(product)"
+        >
+          {{ availableStock(product, reserved) === 0 ? 'Agotado' : 'Agregar al carrito' }}
+        </button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<div class="cart-feedback" *ngIf="feedback" role="status">
+  <span class="cart-feedback-icon" aria-hidden="true">&#10003;</span>
+  <span>{{ feedback }}</span>
+</div>

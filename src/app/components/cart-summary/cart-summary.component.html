@@ -1,0 +1,198 @@
+<section class="cart-summary" [class.is-open]="panelOpen">
+
+  <header class="cart-header">
+    <div class="cart-heading">
+      <span class="section-label">Tu compra</span>
+      <h2>Carrito</h2>
+    </div>
+
+    <div class="cart-heading-summary">
+      <span class="cart-count">
+        {{ cartItems.length }} {{ cartItems.length === 1 ? 'producto' : 'productos' }}
+      </span>
+
+      <strong class="cart-heading-total">
+        {{ cartItems | cartTotal | currency:'GTQ':'symbol':'1.2-2' }}
+      </strong>
+    </div>
+
+    <button
+      type="button"
+      class="panel-toggle"
+      (click)="togglePanel()"
+      [attr.aria-expanded]="panelOpen"
+      aria-controls="cart-body"
+      aria-label="Mostrar u ocultar el carrito"
+    >
+      <span aria-hidden="true">▾</span>
+    </button>
+  </header>
+
+  <p class="cart-notice" *ngIf="notice" role="status">{{ notice }}</p>
+
+  <div class="cart-body" id="cart-body">
+
+    <div class="empty-cart" *ngIf="cartItems.length === 0">
+      <h3>Tu carrito está vacío</h3>
+      <p>Agrega productos del catálogo para comenzar tu compra.</p>
+    </div>
+
+    <div class="cart-items" *ngIf="cartItems.length > 0">
+      <article class="cart-item" *ngFor="let item of cartItems">
+
+        <img
+          [src]="item.product.image"
+          [alt]="item.product.name"
+        />
+
+        <div class="item-info">
+          <h3>{{ item.product.name }}</h3>
+
+          <p>
+            {{ item.product.price | currency:'GTQ':'symbol':'1.2-2' }}
+            por unidad
+          </p>
+
+          <span>
+            Subtotal:
+              {{ item | subtotal | currency:'GTQ':'symbol':'1.2-2' }}
+          </span>
+        </div>
+
+        <div class="quantity-controls">
+          <button
+            type="button"
+            aria-label="Disminuir cantidad"
+            (click)="updateQuantity(item.product.id, item.quantity - 1)"
+          >
+            −
+          </button>
+
+          <span>{{ item.quantity }}</span>
+
+          <button
+            type="button"
+            aria-label="Aumentar cantidad"
+            [disabled]="item.quantity >= item.product.stock"
+            (click)="updateQuantity(item.product.id, item.quantity + 1)"
+          >
+            +
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="remove-button"
+          (click)="removeProduct(item.product.id)"
+        >
+          Eliminar
+        </button>
+      </article>
+    </div>
+
+    <div class="cart-total" *ngIf="cartItems.length > 0">
+      <span>Total</span>
+
+      <strong>
+        {{ cartItems | cartTotal | currency:'GTQ':'symbol':'1.2-2' }}
+      </strong>
+    </div>
+
+    <div class="cart-actions" *ngIf="cartItems.length > 0">
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="requestCancelOrder()"
+      >
+        Cancelar compra
+      </button>
+
+      <button
+        type="button"
+        class="checkout-button"
+        (click)="finishOrder()"
+      >
+        Finalizar compra
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="overlay"
+    *ngIf="showCancelConfirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cancel-order-title"
+  >
+    <div class="overlay-card">
+      <h3 id="cancel-order-title">¿Cancelar compra?</h3>
+
+      <p>
+        Se eliminarán los productos del carrito y se restaurará el stock
+        utilizado durante esta sesión.
+      </p>
+
+      <div class="overlay-actions">
+        <button
+          type="button"
+          class="overlay-secondary"
+          (click)="dismissCancelOrder()"
+        >
+          Volver
+        </button>
+
+        <button
+          type="button"
+          class="overlay-danger"
+          (click)="confirmCancelOrder()"
+        >
+          Cancelar compra
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="overlay"
+    *ngIf="showOrderCompleted"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="order-completed-title"
+  >
+    <div class="overlay-card">
+      <span class="order-badge">Compra simulada</span>
+
+      <h3 id="order-completed-title">¡Gracias por tu compra!</h3>
+
+      <ul class="order-list">
+        <li *ngFor="let item of completedItems">
+          <span>{{ item.product.name }} × {{ item.quantity }}</span>
+          <span>
+            {{ item | subtotal | currency:'GTQ':'symbol':'1.2-2' }}
+          </span>
+        </li>
+      </ul>
+
+      <div class="order-total">
+        <span>Total</span>
+
+        <strong>
+          {{ completedItems | cartTotal | currency:'GTQ':'symbol':'1.2-2' }}
+        </strong>
+      </div>
+
+      <p class="order-note">
+        Esta es una compra simulada. No se realizó ningún pago ni se guardó
+        ningún pedido.
+      </p>
+
+      <button
+        type="button"
+        class="checkout-button overlay-primary"
+        (click)="closeOrderCompleted()"
+      >
+        Seguir comprando
+      </button>
+    </div>
+  </div>
+</section>
